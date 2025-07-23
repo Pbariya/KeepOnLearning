@@ -1,0 +1,40 @@
+name: Traceability Analysis
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 1'  # Every Monday
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pandas numpy matplotlib seaborn scikit-learn nltk textblob python-dateutil plotly jinja2
+
+    - name: Run Traceability Analysis
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: python trace_analysis.py
+
+    - name: Upload HTML dashboard
+      uses: actions/upload-artifact@v2
+      with:
+        name: traceability-dashboard
+        path: |
+          comprehensive_trace_analysis.html
+          concept_paper.md
+          comprehensive_trace_analysis_report.json
